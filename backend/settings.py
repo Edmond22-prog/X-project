@@ -128,3 +128,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'app_models.User'
+
+# SUPER_USER
+SUPER_FIRST_NAME = env("SUPER_FIRST_NAME", "Super")
+SUPER_LAST_NAME = env("SUPER_LAST_NAME", "Admin")
+SUPER_USER_EMAIL = env("SUPER_USER_EMAIL", "super_admin@email.com")
+SUPER_USER_PHONE = env("SUPER_USER_PHONE", "699999999")
+SUPER_USER_PASSWORD = env("SUPER_USER_PASSWORD", "password")
