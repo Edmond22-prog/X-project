@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 '''
-
+import datetime
 from pathlib import Path
 
 from envparse import env
@@ -111,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = env("TIME_ZONE", "Africa/Douala")
 
 USE_I18N = True
 
@@ -121,6 +121,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -135,3 +136,27 @@ SUPER_LAST_NAME = env("SUPER_LAST_NAME", "Admin")
 SUPER_USER_EMAIL = env("SUPER_USER_EMAIL", "super_admin@email.com")
 SUPER_USER_PHONE = env("SUPER_USER_PHONE", "699999999")
 SUPER_USER_PASSWORD = env("SUPER_USER_PASSWORD", "password")
+
+# REST FRAMEWORK SETTINGS
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+}
+
+# JWT AUTH SETTINGS
+TOKEN_VALIDITY = env("TOKEN_VALIDITY", 60 * 24, cast=int)   # 1 day = 24 hours
+JWT_AUTH = {
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+    "JWT_EXPIRATION_DELTA": datetime.timedelta(minutes=TOKEN_VALIDITY),
+    "JWT_ALLOW_REFRESH": True,
+}
+
+# SWAGGER SETTINGS
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
+    }
+}
