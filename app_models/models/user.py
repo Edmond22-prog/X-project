@@ -15,6 +15,9 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150)
     email = models.EmailField(unique=True, null=True, default=None)
     phone = models.CharField(max_length=20, unique=True, null=True, default=None)
+    username = models.CharField(
+        max_length=50, unique=True, null=True, default=None, editable=False
+    )
     city = models.CharField(max_length=100, null=True, default=None)
     district = models.CharField(max_length=100, null=True, default=None)
 
