@@ -5,6 +5,8 @@ from utils.common import generate_uuid
 
 
 class User(AbstractUser):
+    REQUIRED_FIELDS = []
+
     uuid = models.CharField(
         max_length=100, default=generate_uuid, editable=False, primary_key=True
     )
@@ -24,9 +26,9 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         if not self.email:
-            self.USERNAME_FIELD = "phone"
+            self.username = self.phone
         else:
-            self.USERNAME_FIELD = "email"
+            self.username = self.email
 
         super().save(*args, **kwargs)
 

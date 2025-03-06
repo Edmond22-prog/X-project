@@ -13,7 +13,7 @@ from backend.settings import (
 logging.info("Creating super admin user...")
 try:
     super_admin = User.objects.create_superuser(
-        username="super_admin",
+        username=SUPER_USER_EMAIL,
         email=SUPER_USER_EMAIL,
         phone=SUPER_USER_PHONE,
         password=SUPER_USER_PASSWORD,
