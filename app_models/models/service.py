@@ -28,12 +28,20 @@ class ServiceRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = "service request"
+        verbose_name_plural = "Services Requests"
+
     def __str__(self):
         return self.title
 
 
 class ServiceProposalSkill(models.Model):
     name = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = "service proposal skill"
+        verbose_name_plural = "Services Proposals Skills"
 
     def __str__(self):
         return self.name
@@ -47,6 +55,10 @@ class ServiceProposalCategory(models.Model):
     fr_description = models.TextField()
     en_name = models.CharField(max_length=50, unique=True)
     en_description = models.TextField()
+
+    class Meta:
+        verbose_name = "service proposal category"
+        verbose_name_plural = "Services Proposals Categories"
 
     def __str__(self):
         return f"{self.fr_name} | {self.en_name}"
@@ -70,6 +82,10 @@ class ServiceProposal(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "service proposal"
+        verbose_name_plural = "Services Proposals"
 
     def __str__(self):
         return self.title
