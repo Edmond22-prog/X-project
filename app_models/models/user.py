@@ -37,3 +37,17 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.get_full_name()
+
+
+class UserVerification(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    verification_photo = models.ImageField(upload_to="verification_photos/")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "user verification"
+        verbose_name_plural = "Users Verifications"
+
+    def __str__(self):
+        return f"Verification photo for {self.user.get_full_name()}"

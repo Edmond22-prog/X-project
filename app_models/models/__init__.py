@@ -5,4 +5,4 @@ from .service import (
     ServiceProposalSkill,
 )
 from .socials import UserSocials, ServiceRequestSocials
-from .user import User
+from .user import User, UserVerification

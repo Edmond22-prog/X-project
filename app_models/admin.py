@@ -8,6 +8,7 @@ from app_models.models import (
     ServiceProposalCategory,
     User,
     UserSocials,
+    UserVerification,
 )
 
 
@@ -29,6 +30,11 @@ class ServiceProposalAdmin(admin.ModelAdmin):
     list_display = ("uuid", "title", "hourly_rate", "user")
     list_filter = ("user", "category")
     search_fields = ("description",)
+
+
+@admin.register(UserVerification)
+class UserVerificationAdmin(admin.ModelAdmin):
+    list_display = ("user", "verification_photo", "created_at", "updated_at")
 
 
 admin.site.site_header = "X-Project Administration Site"
