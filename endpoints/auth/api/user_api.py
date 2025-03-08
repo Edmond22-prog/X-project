@@ -9,11 +9,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_models.models import User, UserVerification
+from middlewares.auth_middleware import check_is_connected
 from serializers.user_serializer import (
     RegisterUserSerializer,
+    RichUserSerializer,
     UserMinSerializer,
     UserVerificationSerializer,
 )
+from utils.user_utils import get_connected_user
 
 
 class RegisterUserAPIView(APIView):
@@ -101,4 +104,27 @@ class UserVerificationAPIView(APIView):
         return Response(
             {"message": "Picture registered successfully ! Please wait for validation."},
             status=status.HTTP_200_OK,
+        )
+
+
+class ConnectedUserAPIView(APIView):
+    @swagger_auto_schema(
+        operation_id="connected_user",
+        operation_description="Endpoint to get the connected user",
+        operation_summary="Get the connected user",
+        responses={200: RichUserSerializer()},
+        tags=["Users"],
+        security=[{"Bearer": []}],
+    )
+    @check_is_connected
+    def get(self, request, *args, **kwargs):
+        connected_user = get_connected_user(request)
+        if not connected_user:
+            return Response(
+                {"error": "Connected user not found !"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        return Response(
+            RichUserSerializer(connected_user).data, status=status.HTTP_200_OK
         )
