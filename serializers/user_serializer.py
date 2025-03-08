@@ -33,3 +33,8 @@ class UserMinSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("uuid", "first_name", "last_name", "email", "phone")
+
+
+class UserVerificationSerializer(serializers.Serializer):
+    user_uuid = serializers.CharField()
+    photo = serializers.ImageField()
