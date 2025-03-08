@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
@@ -37,10 +38,11 @@ schema_view = get_schema_view(
 START_URL = f"api/{API_VERSION}"
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path(f'{START_URL}/auth/', include('endpoints.auth.urls')),
-    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('', schema_view.with_ui("swagger", cache_timeout=0))
+    path("admin/", admin.site.urls),
+    path(f"{START_URL}/auth/", include("endpoints.auth.urls")),
+    path(f"{START_URL}/services/", include("endpoints.services.urls")),
+    path("swagger<format>/", schema_view.without_ui(cache_timeout=0), name="schema-json"),
+    path("", schema_view.with_ui("swagger", cache_timeout=0)),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

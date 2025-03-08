@@ -37,3 +37,40 @@ class ServiceProposalSerializer(serializers.ModelSerializer):
             return f"{category.fr_name} | {category.en_name}"
         
         return None
+
+
+class CreateServiceRequestSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=False)
+    phone = serializers.CharField(max_length=20, required=False)
+    whatsapp = serializers.CharField(max_length=20, required=False)
+    telegram = serializers.CharField(max_length=20, required=False)
+
+    class Meta:
+        model = ServiceRequest
+        fields = (
+            "title",
+            "description",
+            "city",
+            "district",
+            "duration",
+            "fixed_amount",
+            "email",
+            "phone",
+            "whatsapp",
+            "telegram",
+        )
+
+    def validate(self, attrs):
+        if not any(
+            [
+                attrs.get("email", None),
+                attrs.get("phone", None),
+                attrs.get("whatsapp", None),
+                attrs.get("telegram", None),
+            ]
+        ):
+            raise serializers.ValidationError(
+                "At least one contact information is required."
+            )
+
+        return attrs
