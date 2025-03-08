@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+python3 manage.py collectstatic --no-input
+
+# Migration
+echo "y" | python3 manage.py makemigrations --merge
+python3 manage.py makemigrations --no-input
+python3 manage.py migrate --no-input
+
+# Seeders
+python3 manage.py test app_models.seeders.initialize_db
+
+# Run server
+gunicorn backend.wsgi --bind 0.0.0.0:8000

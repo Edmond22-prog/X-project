@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user237
+      POSTGRES_PASSWORD: password237
+      POSTGRES_DB: project_db
+    volumes:
+      - ./.data/postgresql:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+    command: /start
+    volumes:
+      - .:/app
+      - ./.data/static:/app/staticfiles
+      - ./.data/media:/app/media
+    environment:
+      POSTGRES_DB_HOST: postgres
+      POSTGRES_DB_USER: user237
+      POSTGRES_DB_PASSWORD: password237
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
