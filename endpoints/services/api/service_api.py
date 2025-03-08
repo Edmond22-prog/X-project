@@ -115,3 +115,26 @@ class PaginatedServicesRequestsAPIView(APIView):
         }
 
         return Response(output, status=status.HTTP_200_OK)
+
+
+class GetServiceRequestAPIView(APIView):
+    @swagger_auto_schema(
+        operation_id="get_service_request",
+        operation_description="Endpoint for getting a service request by its uuid",
+        operation_summary="Get a service request by its uuid",
+        responses={200: ServiceRequestSerializer()},
+        tags=["Services"],
+        security=[],
+    )
+    def get(self, request, service_request_uuid: str):
+        try:
+            service_request = ServiceRequest.objects.get(uuid=service_request_uuid)
+        except ServiceRequest.DoesNotExist:
+            return Response(
+                {"error": "Service request not found !"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(
+            ServiceRequestSerializer(service_request).data, status=status.HTTP_200_OK
+        )
