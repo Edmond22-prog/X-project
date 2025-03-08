@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_models.models import ServiceRequest, ServiceRequestSocials
+from app_models.models.constants import ServiceRequestStatus
 from middlewares.auth_middleware import check_is_connected
 from serializers.service_serializer import (
     CreateServiceRequestSerializer,
@@ -66,3 +67,51 @@ class CreateServiceRequestAPIView(APIView):
             ServiceRequestSerializer(service_request).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+class PaginatedServicesRequestsAPIView(APIView):
+    @swagger_auto_schema(
+        operation_id="paginated_services_requests",
+        operation_description="Endpoint for getting paginated services requests",
+        operation_summary="Get paginated services requests",
+        responses={200: ServiceRequestSerializer(many=True)},
+        tags=["Services"],
+        security=[],
+    )
+    def get(self, request):
+        page = 1
+        size = 10
+        if "page" in request.GET and request.GET["page"].strip() != "":
+            page = int(request.GET["page"])
+
+        if "size" in request.GET and request.GET["size"].strip() != "":
+            size = int(request.GET["size"])
+
+        start = (page - 1) * size
+        end = page * size
+
+        # Retrieve services requests
+        services_requests = ServiceRequest.objects.filter(
+            status=ServiceRequestStatus.ACTIVE,
+        ).order_by("-updated_at")
+        total = services_requests.count()
+        if not services_requests:
+            output = {
+                "page": page,
+                "size": size,
+                "total": total,
+                "more": False,
+                "requests": [],
+            }
+        
+        output = {
+            "page": page,
+            "size": size,
+            "total": total,
+            "more": end < total,
+            "requests": ServiceRequestSerializer(
+                services_requests[start:end], many=True
+            ).data,
+        }
+
+        return Response(output, status=status.HTTP_200_OK)
