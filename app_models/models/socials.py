@@ -5,7 +5,7 @@ from app_models.models.user import User
 
 
 class UserSocials(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="socials")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="socials")
     whatsapp = models.CharField(max_length=20, null=True, default=None)
     telegram = models.CharField(max_length=20, null=True, default=None)
 
@@ -18,7 +18,7 @@ class UserSocials(models.Model):
 
 
 class ServiceRequestSocials(models.Model):
-    service_request = models.ForeignKey(
+    service_request = models.OneToOneField(
         ServiceRequest, on_delete=models.CASCADE, related_name="contacts"
     )
     email = models.EmailField(null=True, default=None)
