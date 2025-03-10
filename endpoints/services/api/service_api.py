@@ -3,11 +3,17 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app_models.models import ServiceProposalSkill, ServiceRequest, ServiceRequestSocials
+from app_models.models import (
+    ServiceProposalCategory,
+    ServiceProposalSkill,
+    ServiceRequest,
+    ServiceRequestSocials,
+)
 from app_models.models.constants import ServiceRequestStatus
 from middlewares.auth_middleware import check_is_connected
 from serializers.service_serializer import (
     CreateServiceRequestSerializer,
+    ServiceProposalCategorySerializer,
     ServiceProposalSkillSerializer,
     ServiceRequestSerializer,
 )
@@ -154,5 +160,22 @@ class RetrieveSkillsAPIView(APIView):
         skills = ServiceProposalSkill.objects.all()
         return Response(
             ServiceProposalSkillSerializer(skills, many=True).data,
+            status=status.HTTP_200_OK,
+        )
+
+
+class RetrieveCategoriesAPIView(APIView):
+    @swagger_auto_schema(
+        operation_id="retrieve_categories",
+        operation_description="Endpoint for retrieving all service proposal categories",
+        operation_summary="Retrieve all service proposal categories",
+        responses={200: ServiceProposalCategorySerializer(many=True)},
+        tags=["Services"],
+        security=[],
+    )
+    def get(self, request):
+        categories = ServiceProposalCategory.objects.all()
+        return Response(
+            ServiceProposalCategorySerializer(categories, many=True).data,
             status=status.HTTP_200_OK,
         )
