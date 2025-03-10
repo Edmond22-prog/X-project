@@ -39,6 +39,7 @@ START_URL = f"api/{API_VERSION}"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(f'{START_URL}/auth/', include('endpoints.auth.urls')),
+    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui("swagger", cache_timeout=0))
 ]
 
