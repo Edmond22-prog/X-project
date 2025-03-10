@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from app_models.models import ServiceProposal, ServiceRequest
+from app_models.models import ServiceProposal, ServiceProposalSkill, ServiceRequest
 
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
@@ -74,3 +74,9 @@ class CreateServiceRequestSerializer(serializers.ModelSerializer):
             )
 
         return attrs
+
+
+class ServiceProposalSkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceProposalSkill
+        fields = "__all__"

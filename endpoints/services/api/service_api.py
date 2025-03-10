@@ -3,11 +3,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app_models.models import ServiceRequest, ServiceRequestSocials
+from app_models.models import ServiceProposalSkill, ServiceRequest, ServiceRequestSocials
 from app_models.models.constants import ServiceRequestStatus
 from middlewares.auth_middleware import check_is_connected
 from serializers.service_serializer import (
     CreateServiceRequestSerializer,
+    ServiceProposalSkillSerializer,
     ServiceRequestSerializer,
 )
 from utils.user_utils import get_connected_user
@@ -137,4 +138,21 @@ class GetServiceRequestAPIView(APIView):
 
         return Response(
             ServiceRequestSerializer(service_request).data, status=status.HTTP_200_OK
+        )
+
+
+class RetrieveSkillsAPIView(APIView):
+    @swagger_auto_schema(
+        operation_id="retrieve_skills",
+        operation_description="Endpoint for retrieving all service proposal skills",
+        operation_summary="Retrieve all service proposal skills",
+        responses={200: ServiceProposalSkillSerializer(many=True)},
+        tags=["Services"],
+        security=[],
+    )
+    def get(self, request):
+        skills = ServiceProposalSkill.objects.all()
+        return Response(
+            ServiceProposalSkillSerializer(skills, many=True).data,
+            status=status.HTTP_200_OK,
         )
