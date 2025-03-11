@@ -25,7 +25,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs):
-        if not any([attrs["email"], attrs["phone"]]):
+        if not any([attrs.get("email", None), attrs.get("phone", None)]):
             raise serializers.ValidationError("Either email or phone is required.")
 
         if attrs["password"] != attrs["confirm_password"]:
