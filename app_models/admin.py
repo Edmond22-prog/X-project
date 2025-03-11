@@ -50,14 +50,12 @@ class UserVerificationAdmin(admin.ModelAdmin):
     def approve_verification(self, request, queryset):
         for verification in queryset:
             verification.user.is_verified = True
-            verification.user.is_active = True
             verification.user.save()
     
     @admin.action(description="Reject selected verifications")
     def reject_verification(self, request, queryset):
         for verification in queryset:
             verification.user.is_verified = False
-            verification.user.is_active = False
             verification.user.save()
 
 

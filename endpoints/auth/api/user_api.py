@@ -47,6 +47,7 @@ class RegisterUserAPIView(APIView):
             phone=validated_data.get("phone", None),
             city=validated_data.get("city", None),
             district=validated_data.get("district", None),
+            is_active=True,
         )
         user.password = make_password(validated_data["password"])
         user.save()
