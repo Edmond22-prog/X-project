@@ -83,7 +83,7 @@ class RichUserSerializer(serializers.ModelSerializer):
     def get_proposals(self, user):
         user_proposals = user.services.all()
         return ServiceProposalSerializer(user_proposals, many=True).data
-    
+
     def get_socials(self, user):
         socials = UserSocials.objects.filter(user=user).first()
         if socials:
@@ -91,5 +91,5 @@ class RichUserSerializer(serializers.ModelSerializer):
                 "whatsapp": socials.whatsapp,
                 "telegram": socials.telegram,
             }
-        
+
         return None
