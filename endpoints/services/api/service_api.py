@@ -79,7 +79,7 @@ class CreateServiceRequestAPIView(APIView):
         )
 
 
-class PaginatedServicesRequestsAPIView(APIView):
+class PaginatedServiceRequestsAPIView(APIView):
     @swagger_auto_schema(
         operation_id="paginated_services_requests",
         operation_description="Endpoint for getting paginated services requests",
@@ -105,15 +105,7 @@ class PaginatedServicesRequestsAPIView(APIView):
             status=ServiceRequestStatus.ACTIVE,
         ).order_by("-updated_at")
         total = services_requests.count()
-        if not services_requests:
-            output = {
-                "page": page,
-                "size": size,
-                "total": total,
-                "more": False,
-                "requests": [],
-            }
-        
+
         output = {
             "page": page,
             "size": size,
@@ -222,7 +214,7 @@ class CreateServiceProposalAPIView(APIView):
                 name=formatted_skill_name
             )
             skills.append(skill)
-        
+
         # Check if the category exists
         try:
             existing_category = ServiceProposalCategory.objects.get(
@@ -262,9 +254,17 @@ class PaginatedServiceProposalsAPIView(APIView):
         security=[],
     )
     def get(self, request):
-        page = int(request.GET.get("page", 1))
-        size = int(request.GET.get("size", 10))
-        category_uuid = request.GET.get("category_uuid", None)
+        page = 1
+        size = 10
+        if "page" in request.GET and request.GET["page"].strip() != "":
+            page = int(request.GET["page"])
+
+        if "size" in request.GET and request.GET["size"].strip() != "":
+            size = int(request.GET["size"])
+
+        category_uuid = None
+        if "category_uuid" in request.GET and request.GET["category_uuid"].strip() != "":
+            category_uuid = request.GET["category_uuid"]
 
         filters = {}
         if category_uuid:
