@@ -250,3 +250,41 @@ class CreateServiceProposalAPIView(APIView):
             ServiceProposalSerializer(service_proposal).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+class PaginatedServiceProposalsAPIView(APIView):
+    @swagger_auto_schema(
+        operation_id="paginated_service_proposals",
+        operation_description="Endpoint for getting paginated service proposals with optional filters",
+        operation_summary="Get paginated service proposals",
+        responses={200: ServiceProposalSerializer(many=True)},
+        tags=["Services"],
+        security=[],
+    )
+    def get(self, request):
+        page = int(request.GET.get("page", 1))
+        size = int(request.GET.get("size", 10))
+        category_uuid = request.GET.get("category_uuid", None)
+
+        filters = {}
+        if category_uuid:
+            filters["category__uuid"] = category_uuid
+
+        # Retrieve service proposals with optional filters
+        service_proposals = ServiceProposal.objects.filter(**filters)
+
+        total = service_proposals.count()
+        start = (page - 1) * size
+        end = page * size
+
+        output = {
+            "page": page,
+            "size": size,
+            "total": total,
+            "more": end < total,
+            "proposals": ServiceProposalSerializer(
+                service_proposals[start:end], many=True
+            ).data,
+        }
+
+        return Response(output, status=status.HTTP_200_OK)
