@@ -10,6 +10,7 @@ from app_models.models import (
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
     socials = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
     
     class Meta:
         model = ServiceRequest
@@ -23,11 +24,21 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
             "whatsapp": contacts.whatsapp,
             "telegram": contacts.telegram,
         }
+    
+    def get_user(self, service_request):
+        user = service_request.user
+        return {
+            "uuid": user.uuid,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "is_verified": user.is_verified,
+        }
 
 
 class ServiceProposalSerializer(serializers.ModelSerializer):
     skills = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
     
     class Meta:
         model = ServiceProposal
@@ -42,6 +53,15 @@ class ServiceProposalSerializer(serializers.ModelSerializer):
             return f"{category.fr_name} | {category.en_name}"
         
         return None
+    
+    def get_user(self, service_prop):
+        user = service_prop.user
+        return {
+            "uuid": user.uuid,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "is_verified": user.is_verified,
+        }
 
 
 class CreateServiceRequestSerializer(serializers.ModelSerializer):
