@@ -33,10 +33,22 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class UserMinSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("uuid", "first_name", "last_name", "email", "phone")
+        fields = (
+            "uuid",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "city",
+            "district",
+            "last_login",
+            "is_verified",
+            "created_at",
+            "updated_at",
+        )
 
 
 class UserVerificationSerializer(serializers.Serializer):

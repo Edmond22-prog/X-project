@@ -13,7 +13,7 @@ from middlewares.auth_middleware import check_is_connected
 from serializers.user_serializer import (
     RegisterUserSerializer,
     RichUserSerializer,
-    UserMinSerializer,
+    UserSerializer,
     UserVerificationSerializer,
 )
 from utils.user_utils import get_connected_user
@@ -27,7 +27,7 @@ class RegisterUserAPIView(APIView):
         operation_description="Endpoint for user registration",
         operation_summary="Register an user",
         request_body=RegisterUserSerializer,
-        responses={201: UserMinSerializer()},
+        responses={201: UserSerializer()},
         tags=["Users"],
         security=[],
     )
@@ -52,7 +52,7 @@ class RegisterUserAPIView(APIView):
         user.password = make_password(validated_data["password"])
         user.save()
 
-        return Response(UserMinSerializer(user).data, status=status.HTTP_201_CREATED)
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
 class UserVerificationAPIView(APIView):
