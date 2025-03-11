@@ -1,6 +1,7 @@
 from django.urls import path
 
 from endpoints.services.api.service_api import (
+    CreateServiceProposalAPIView,
     CreateServiceRequestAPIView,
     GetServiceRequestAPIView,
     PaginatedServicesRequestsAPIView,
@@ -14,4 +15,5 @@ urlpatterns = [
     path("requests/<str:service_request_uuid>/get/", GetServiceRequestAPIView.as_view()),
     path("skills/", RetrieveSkillsAPIView.as_view()),
     path("categories/", RetrieveCategoriesAPIView.as_view()),
+    path("create/proposal", CreateServiceProposalAPIView.as_view()),
 ]

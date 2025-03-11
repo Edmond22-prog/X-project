@@ -91,3 +91,27 @@ class ServiceProposalCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceProposalCategory
         fields = "__all__"
+
+
+class CreateServiceProposalSerializer(serializers.ModelSerializer):
+    skills = serializers.ListField(child=serializers.CharField())
+    category_uuid = serializers.CharField()
+
+    class Meta:
+        model = ServiceProposal
+        fields = (
+            "title",
+            "description",
+            "hourly_rate",
+            "skills",
+            "category_uuid",
+        )
+
+    def validate(self, attrs):
+        if not attrs.get("skills", None):
+            raise serializers.ValidationError("Skills are required.")
+
+        if not attrs.get("category_uuid", None):
+            raise serializers.ValidationError("Category is required.")
+
+        return attrs

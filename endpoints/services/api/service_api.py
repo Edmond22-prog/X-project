@@ -10,10 +10,13 @@ from app_models.models import (
     ServiceRequestSocials,
 )
 from app_models.models.constants import ServiceRequestStatus
+from app_models.models.service import ServiceProposal
 from middlewares.auth_middleware import check_is_connected
 from serializers.service_serializer import (
+    CreateServiceProposalSerializer,
     CreateServiceRequestSerializer,
     ServiceProposalCategorySerializer,
+    ServiceProposalSerializer,
     ServiceProposalSkillSerializer,
     ServiceRequestSerializer,
 )
@@ -178,4 +181,72 @@ class RetrieveCategoriesAPIView(APIView):
         return Response(
             ServiceProposalCategorySerializer(categories, many=True).data,
             status=status.HTTP_200_OK,
+        )
+
+
+class CreateServiceProposalAPIView(APIView):
+    serializer_class = CreateServiceProposalSerializer
+
+    @swagger_auto_schema(
+        operation_id="create_service_proposal",
+        operation_description="Endpoint for service proposal creation",
+        operation_summary="Create a service proposal",
+        request_body=CreateServiceProposalSerializer,
+        responses={201: ServiceProposalSerializer()},
+        tags=["Services"],
+        security=[{"Bearer": []}],
+    )
+    @check_is_connected
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {"error": serializer.errors["non_field_errors"][0]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        validated_data = serializer.validated_data
+        # Get the connected user
+        connected_user = get_connected_user(request)
+        if not connected_user:
+            return Response(
+                {"error": "Connected user not found !"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Create or get skills
+        skills = []
+        for skill_name in validated_data["skills"]:
+            formatted_skill_name = skill_name.strip().lower()
+            skill, created = ServiceProposalSkill.objects.get_or_create(
+                name=formatted_skill_name
+            )
+            skills.append(skill)
+        
+        # Check if the category exists
+        try:
+            existing_category = ServiceProposalCategory.objects.get(
+                uuid=validated_data["category_uuid"],
+            )
+        except ServiceProposalCategory.DoesNotExist:
+            return Response(
+                {"error": "Category not found !"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Create the service proposal
+        service_proposal = ServiceProposal.objects.create(
+            user=connected_user,
+            title=validated_data["title"],
+            description=validated_data["description"],
+            hourly_rate=validated_data["hourly_rate"],
+            category=existing_category,
+        )
+
+        # Add skills to the service proposal
+        service_proposal.skills.set(skills)
+
+        return Response(
+            ServiceProposalSerializer(service_proposal).data,
+            status=status.HTTP_201_CREATED,
         )
