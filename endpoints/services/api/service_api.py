@@ -19,6 +19,7 @@ from serializers.service_serializer import (
     ServiceProposalSerializer,
     ServiceProposalSkillSerializer,
     ServiceRequestSerializer,
+    UpdateServiceRequestSerializer,
 )
 from utils.user_utils import get_connected_user
 
@@ -288,3 +289,51 @@ class PaginatedServiceProposalsAPIView(APIView):
         }
 
         return Response(output, status=status.HTTP_200_OK)
+
+
+class UpdateServiceRequestAPIView(APIView):
+    serializer_class = UpdateServiceRequestSerializer
+
+    @swagger_auto_schema(
+        operation_id="update_service_request",
+        operation_description="Endpoint for updating a service request",
+        operation_summary="Update a service request",
+        request_body=UpdateServiceRequestSerializer,
+        responses={200: ServiceRequestSerializer()},
+        tags=["Services"],
+        security=[{"Bearer": []}],
+    )
+    @check_is_connected
+    def put(self, request, request_uuid: str, *args, **kwargs):
+        connected_user = get_connected_user(request)
+        if not connected_user:
+            return Response(
+                {"error": "Connected user not found !"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        try:
+            service_request = ServiceRequest.objects.get(
+                uuid=request_uuid, user=connected_user
+            )
+        except ServiceRequest.DoesNotExist:
+            return Response(
+                {
+                    "error": "Service request not found or you do not have permission to edit this request!"
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = self.serializer_class(
+            service_request, data=request.data, partial=True
+        )
+        if not serializer.is_valid():
+            return Response(
+                {"error": serializer.errors["non_field_errors"][0]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer.save()
+        return Response(
+            ServiceRequestSerializer(service_request).data, status=status.HTTP_200_OK
+        )
