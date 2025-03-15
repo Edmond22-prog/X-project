@@ -1,12 +1,14 @@
 import logging
 
 import jwt
+from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
 from rest_framework_jwt.views import ObtainJSONWebToken, RefreshJSONWebToken
 
+from app_models.models.user import User
 from serializers.auth_serializer import LoginSerializer, RefreshSerializer
 
 
@@ -48,6 +50,20 @@ class LoginAPIView(ObtainJSONWebToken):
                 "type": "refresh",
             }
         )
+        
+        # Update the user last login
+        try:
+            user = User.objects.get(email=user_data["email"])
+            user.last_login = timezone.now()
+            user.save()
+        
+        except User.DoesNotExist:
+            user = User.objects.get(phone=user_data["phone"])
+            user.last_login = timezone.now()
+            user.save()
+        
+        except:
+            logging.exception("Error updating user last login")
 
         return Response(
             {"token": token_data["token"], "refresh": refresh_token},
