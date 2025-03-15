@@ -115,7 +115,7 @@ class ConnectedUserAPIView(APIView):
         operation_description="Endpoint to get the connected user",
         operation_summary="Get the connected user",
         responses={200: RichUserSerializer()},
-        tags=["Users"],
+        tags=["Auth"],
         security=[{"Bearer": []}],
     )
     @check_is_connected
