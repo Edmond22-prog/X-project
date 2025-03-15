@@ -56,10 +56,42 @@ class UserVerificationSerializer(serializers.Serializer):
     photo = serializers.ImageField()
 
 
-class RichUserSerializer(serializers.ModelSerializer):
-    requests = serializers.SerializerMethodField()
+class UserProfileSerializer(serializers.ModelSerializer):
     proposals = serializers.SerializerMethodField()
     socials = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = (
+            "uuid",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "city",
+            "district",
+            "is_verified",
+            "proposals",
+            "socials",
+        )
+    
+    def get_proposals(self, user):
+        user_proposals = user.services.all()
+        return ServiceProposalSerializer(user_proposals, many=True).data
+
+    def get_socials(self, user):
+        socials = UserSocials.objects.filter(user=user).first()
+        if socials:
+            return {
+                "whatsapp": socials.whatsapp,
+                "telegram": socials.telegram,
+            }
+
+        return None
+
+
+class RichUserSerializer(UserProfileSerializer):
+    requests = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -79,17 +111,3 @@ class RichUserSerializer(serializers.ModelSerializer):
     def get_requests(self, user):
         user_requests = user.service_requests.all()
         return ServiceRequestSerializer(user_requests, many=True).data
-
-    def get_proposals(self, user):
-        user_proposals = user.services.all()
-        return ServiceProposalSerializer(user_proposals, many=True).data
-
-    def get_socials(self, user):
-        socials = UserSocials.objects.filter(user=user).first()
-        if socials:
-            return {
-                "whatsapp": socials.whatsapp,
-                "telegram": socials.telegram,
-            }
-
-        return None

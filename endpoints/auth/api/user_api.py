@@ -13,6 +13,7 @@ from middlewares.auth_middleware import check_is_connected
 from serializers.user_serializer import (
     RegisterUserSerializer,
     RichUserSerializer,
+    UserProfileSerializer,
     UserSerializer,
     UserVerificationSerializer,
 )
@@ -129,3 +130,23 @@ class ConnectedUserAPIView(APIView):
         return Response(
             RichUserSerializer(connected_user).data, status=status.HTTP_200_OK
         )
+
+
+class GetUserProfileAPIView(APIView):
+    @swagger_auto_schema(
+        operation_id="get_user_profile",
+        operation_description="Endpoint to get a user profile",
+        operation_summary="Get a user profile",
+        responses={200: UserProfileSerializer()},
+        tags=["Users"],
+        security=[],
+    )
+    def get(self, request, user_uuid, *args, **kwargs):
+        try:
+            user = User.objects.get(uuid=user_uuid)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(UserProfileSerializer(user).data, status=status.HTTP_200_OK)
