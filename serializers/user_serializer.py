@@ -25,7 +25,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs):
-        if not any([attrs["email"], attrs["phone"]]):
+        if not any([attrs.get("email", None), attrs.get("phone", None)]):
             raise serializers.ValidationError("Either email or phone is required.")
 
         if attrs["password"] != attrs["confirm_password"]:
@@ -33,10 +33,22 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class UserMinSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("uuid", "first_name", "last_name", "email", "phone")
+        fields = (
+            "uuid",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "city",
+            "district",
+            "last_login",
+            "is_verified",
+            "created_at",
+            "updated_at",
+        )
 
 
 class UserVerificationSerializer(serializers.Serializer):
@@ -71,7 +83,7 @@ class RichUserSerializer(serializers.ModelSerializer):
     def get_proposals(self, user):
         user_proposals = user.services.all()
         return ServiceProposalSerializer(user_proposals, many=True).data
-    
+
     def get_socials(self, user):
         socials = UserSocials.objects.filter(user=user).first()
         if socials:
@@ -79,5 +91,5 @@ class RichUserSerializer(serializers.ModelSerializer):
                 "whatsapp": socials.whatsapp,
                 "telegram": socials.telegram,
             }
-        
+
         return None
