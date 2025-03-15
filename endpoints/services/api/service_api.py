@@ -19,6 +19,7 @@ from serializers.service_serializer import (
     ServiceProposalSerializer,
     ServiceProposalSkillSerializer,
     ServiceRequestSerializer,
+    UpdateServiceProposalSerializer,
     UpdateServiceRequestSerializer,
 )
 from utils.user_utils import get_connected_user
@@ -336,4 +337,78 @@ class UpdateServiceRequestAPIView(APIView):
         serializer.save()
         return Response(
             ServiceRequestSerializer(service_request).data, status=status.HTTP_200_OK
+        )
+
+
+class UpdateServiceProposalAPIView(APIView):
+    serializer_class = UpdateServiceProposalSerializer
+
+    @swagger_auto_schema(
+        operation_id="update_service_proposal",
+        operation_description="Endpoint for updating a service proposal",
+        operation_summary="Update a service proposal",
+        request_body=UpdateServiceProposalSerializer,
+        responses={200: ServiceProposalSerializer()},
+        tags=["Services"],
+        security=[{"Bearer": []}],
+    )
+    @check_is_connected
+    def put(self, request, proposal_uuid: str, *args, **kwargs):
+        connected_user = get_connected_user(request)
+        if not connected_user:
+            return Response(
+                {"error": "Connected user not found !"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        try:
+            service_proposal = ServiceProposal.objects.get(
+                uuid=proposal_uuid, user=connected_user
+            )
+        except ServiceProposal.DoesNotExist:
+            return Response(
+                {
+                    "error": "Service proposal not found or you do not have permission to edit this proposal!"
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = self.serializer_class(
+            service_proposal, data=request.data, partial=True
+        )
+        if not serializer.is_valid():
+            return Response(
+                {"error": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        validated_data = serializer.validated_data
+        if "category_uuid" in validated_data:
+            try:
+                existing_category = ServiceProposalCategory.objects.get(
+                    uuid=validated_data["category_uuid"],
+                )
+            except ServiceProposalCategory.DoesNotExist:
+                return Response(
+                    {"error": "Category not found !"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            service_proposal.category = existing_category
+
+        # Create or get skills
+        if "skills" in validated_data:
+            skills = []
+            for skill_name in validated_data["skills"]:
+                formatted_skill_name = skill_name.strip().lower()
+                skill, created = ServiceProposalSkill.objects.get_or_create(
+                    name=formatted_skill_name
+                )
+                skills.append(skill)
+                
+            service_proposal.skills.set(skills)
+
+        serializer.save()
+        return Response(
+            ServiceProposalSerializer(service_proposal).data, status=status.HTTP_200_OK
         )

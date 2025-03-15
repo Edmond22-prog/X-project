@@ -149,3 +149,11 @@ class UpdateServiceRequestSerializer(serializers.ModelSerializer):
             "fixed_amount",
             "status",
         )
+
+
+class UpdateServiceProposalSerializer(serializers.ModelSerializer):
+    category_uuid = serializers.CharField(required=False)
+    
+    class Meta:
+        model = ServiceProposal
+        fields = ("title", "description", "hourly_rate", "skills", "category_uuid") 

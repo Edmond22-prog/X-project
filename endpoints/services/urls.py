@@ -8,6 +8,7 @@ from endpoints.services.api.service_api import (
     PaginatedServiceRequestsAPIView,
     RetrieveCategoriesAPIView,
     RetrieveSkillsAPIView,
+    UpdateServiceProposalAPIView,
     UpdateServiceRequestAPIView,
 )
 
@@ -20,4 +21,5 @@ urlpatterns = [
     path("create/proposal", CreateServiceProposalAPIView.as_view()),
     path("proposals/list/", PaginatedServiceProposalsAPIView.as_view()),
     path("update/request/<str:request_uuid>/", UpdateServiceRequestAPIView.as_view()),
+    path("update/proposal/<str:proposal_uuid>/", UpdateServiceProposalAPIView.as_view()),
 ]
