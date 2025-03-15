@@ -13,6 +13,8 @@ from middlewares.auth_middleware import check_is_connected
 from serializers.user_serializer import (
     RegisterUserSerializer,
     RichUserSerializer,
+    UpdateUserSerializer,
+    UserProfileSerializer,
     UserSerializer,
     UserVerificationSerializer,
 )
@@ -114,7 +116,7 @@ class ConnectedUserAPIView(APIView):
         operation_description="Endpoint to get the connected user",
         operation_summary="Get the connected user",
         responses={200: RichUserSerializer()},
-        tags=["Users"],
+        tags=["Auth"],
         security=[{"Bearer": []}],
     )
     @check_is_connected
@@ -128,4 +130,62 @@ class ConnectedUserAPIView(APIView):
 
         return Response(
             RichUserSerializer(connected_user).data, status=status.HTTP_200_OK
+        )
+
+
+class GetUserProfileAPIView(APIView):
+    @swagger_auto_schema(
+        operation_id="get_user_profile",
+        operation_description="Endpoint to get a user profile",
+        operation_summary="Get a user profile",
+        responses={200: UserProfileSerializer()},
+        tags=["Users"],
+        security=[],
+    )
+    def get(self, request, user_uuid, *args, **kwargs):
+        try:
+            user = User.objects.get(uuid=user_uuid)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(UserProfileSerializer(user).data, status=status.HTTP_200_OK)
+
+
+class UpdateUserProfileAPIView(APIView):
+    serializer_class = UpdateUserSerializer
+
+    @swagger_auto_schema(
+        operation_id="update_user_profile",
+        operation_description="Endpoint for updating user information",
+        operation_summary="Update user information",
+        request_body=UpdateUserSerializer,
+        responses={200: UserSerializer()},
+        tags=["Users"],
+        security=[{"Bearer": []}],
+    )
+    @check_is_connected
+    def put(self, request, *args, **kwargs):
+        connected_user = get_connected_user(request)
+        if not connected_user:
+            return Response(
+                {"error": "Connected user not found !"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        serializer = self.serializer_class(
+            connected_user, 
+            data=request.data, 
+            partial=True
+        )
+        if not serializer.is_valid():
+            return Response(
+                {"error": serializer.errors["non_field_errors"][0]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer.save()
+        return Response(
+            UserSerializer(connected_user).data, status=status.HTTP_200_OK
         )
