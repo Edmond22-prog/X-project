@@ -111,3 +111,16 @@ class RichUserSerializer(UserProfileSerializer):
     def get_requests(self, user):
         user_requests = user.service_requests.all()
         return ServiceRequestSerializer(user_requests, many=True).data
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "city",
+            "district",
+        )

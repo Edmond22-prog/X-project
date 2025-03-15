@@ -5,6 +5,7 @@ from endpoints.auth.api.user_api import (
     ConnectedUserAPIView,
     GetUserProfileAPIView,
     RegisterUserAPIView,
+    UpdateUserProfileAPIView,
     UserVerificationAPIView,
 )
 
@@ -15,4 +16,5 @@ urlpatterns = [
     path("users/verify", UserVerificationAPIView.as_view()),
     path("auth/current-user/", ConnectedUserAPIView.as_view()),
     path("users/<str:user_uuid>/profile/", GetUserProfileAPIView.as_view()),
+    path("users/current/update-profile", UpdateUserProfileAPIView.as_view()),
 ]
