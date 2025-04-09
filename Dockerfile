@@ -9,7 +9,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Update pip
-RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
