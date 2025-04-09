@@ -168,5 +168,8 @@ JWT_AUTH = {
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
         "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
-    }
+    },
+    "DEFAULT_GENERATOR_CLASS": "utils.swagger_utils.CustomSchemaGenerator",
 }
+
+SCHEME = env("SCHEME", "http")
