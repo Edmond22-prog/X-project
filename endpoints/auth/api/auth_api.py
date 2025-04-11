@@ -27,8 +27,9 @@ class LoginAPIView(ObtainJSONWebToken):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
+            logging.exception(serializer.errors)
             return Response(
-                {"error": serializer.errors["non_field_errors"][0]},
+                {"error": "Error while trying to login"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -86,8 +87,9 @@ class RefreshAPIView(RefreshJSONWebToken):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
+            logging.exception(serializer.errors)
             return Response(
-                {"error": serializer.errors["non_field_errors"][0]},
+                {"error": "Error while trying to refresh token"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

@@ -1,3 +1,5 @@
+import logging
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
@@ -41,8 +43,9 @@ class CreateServiceRequestAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
+            logging.exception(serializer.errors)
             return Response(
-                {"error": serializer.errors["non_field_errors"][0]},
+                {"error": "Error while trying to create service request"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -194,8 +197,9 @@ class CreateServiceProposalAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
+            logging.exception(serializer.errors)
             return Response(
-                {"error": serializer.errors["non_field_errors"][0]},
+                {"error": "Error while trying to create service proposal"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -329,8 +333,9 @@ class UpdateServiceRequestAPIView(APIView):
             service_request, data=request.data, partial=True
         )
         if not serializer.is_valid():
+            logging.exception(serializer.errors)
             return Response(
-                {"error": serializer.errors["non_field_errors"][0]},
+                {"error": "Error while trying to update service request"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -377,8 +382,9 @@ class UpdateServiceProposalAPIView(APIView):
             service_proposal, data=request.data, partial=True
         )
         if not serializer.is_valid():
+            logging.exception(serializer.errors)
             return Response(
-                {"error": serializer.errors},
+                {"error": "Error while trying to update service proposal"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
