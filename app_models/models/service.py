@@ -41,6 +41,13 @@ class ServiceRequest(models.Model):
     district = models.CharField(max_length=100)
     duration = models.IntegerField()  # In days
     fixed_amount = models.IntegerField()  # In FCFA
+    category = models.ForeignKey(
+        ServiceCategory,
+        on_delete=models.SET_DEFAULT,
+        related_name="requests",
+        null=False,
+        default="Autre | Other",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
