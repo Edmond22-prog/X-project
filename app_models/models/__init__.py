@@ -1,7 +1,7 @@
 from .service import (
     ServiceRequest,
     ServiceProposal,
-    ServiceProposalCategory,
+    ServiceCategory,
     ServiceProposalSkill,
 )
 from .socials import UserSocials, ServiceRequestSocials

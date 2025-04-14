@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 from app_models.models import (
+    ServiceCategory,
     ServiceProposal,
-    ServiceProposalCategory,
     ServiceProposalSkill,
     ServiceRequest,
 )
@@ -107,9 +107,9 @@ class ServiceProposalSkillSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ServiceProposalCategorySerializer(serializers.ModelSerializer):
+class ServiceCategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ServiceProposalCategory
+        model = ServiceCategory
         fields = "__all__"
 
 
@@ -153,7 +153,7 @@ class UpdateServiceRequestSerializer(serializers.ModelSerializer):
 
 class UpdateServiceProposalSerializer(serializers.ModelSerializer):
     category_uuid = serializers.CharField(required=False)
-    
+
     class Meta:
         model = ServiceProposal
-        fields = ("title", "description", "hourly_rate", "skills", "category_uuid") 
+        fields = ("title", "description", "hourly_rate", "skills", "category_uuid")

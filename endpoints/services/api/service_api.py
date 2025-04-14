@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_models.models import (
-    ServiceProposalCategory,
+    ServiceCategory,
     ServiceProposalSkill,
     ServiceRequest,
     ServiceRequestSocials,
@@ -17,7 +17,7 @@ from middlewares.auth_middleware import check_is_connected
 from serializers.service_serializer import (
     CreateServiceProposalSerializer,
     CreateServiceRequestSerializer,
-    ServiceProposalCategorySerializer,
+    ServiceCategorySerializer,
     ServiceProposalSerializer,
     ServiceProposalSkillSerializer,
     ServiceRequestSerializer,
@@ -176,14 +176,14 @@ class RetrieveCategoriesAPIView(APIView):
         operation_id="retrieve_categories",
         operation_description="Endpoint for retrieving all service proposal categories",
         operation_summary="Retrieve all service proposal categories",
-        responses={200: ServiceProposalCategorySerializer(many=True)},
+        responses={200: ServiceCategorySerializer(many=True)},
         tags=["Services"],
         security=[],
     )
     def get(self, request):
-        categories = ServiceProposalCategory.objects.all()
+        categories = ServiceCategory.objects.all()
         return Response(
-            ServiceProposalCategorySerializer(categories, many=True).data,
+            ServiceCategorySerializer(categories, many=True).data,
             status=status.HTTP_200_OK,
         )
 
@@ -230,10 +230,10 @@ class CreateServiceProposalAPIView(APIView):
 
         # Check if the category exists
         try:
-            existing_category = ServiceProposalCategory.objects.get(
+            existing_category = ServiceCategory.objects.get(
                 uuid=validated_data["category_uuid"],
             )
-        except ServiceProposalCategory.DoesNotExist:
+        except ServiceCategory.DoesNotExist:
             return Response(
                 {"error": "Category not found !"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -401,14 +401,14 @@ class UpdateServiceProposalAPIView(APIView):
                 {"error": "Error while trying to update service proposal"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         validated_data = serializer.validated_data
         if "category_uuid" in validated_data:
             try:
-                existing_category = ServiceProposalCategory.objects.get(
+                existing_category = ServiceCategory.objects.get(
                     uuid=validated_data["category_uuid"],
                 )
-            except ServiceProposalCategory.DoesNotExist:
+            except ServiceCategory.DoesNotExist:
                 return Response(
                     {"error": "Category not found !"},
                     status=status.HTTP_404_NOT_FOUND,
@@ -425,7 +425,7 @@ class UpdateServiceProposalAPIView(APIView):
                     name=formatted_skill_name
                 )
                 skills.append(skill)
-                
+
             service_proposal.skills.set(skills)
 
         serializer.save()
