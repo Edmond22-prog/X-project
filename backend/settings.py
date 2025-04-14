@@ -158,7 +158,7 @@ REST_FRAMEWORK = {
 }
 
 # JWT AUTH SETTINGS
-TOKEN_VALIDITY = env("TOKEN_VALIDITY", 60 * 24, cast=int)   # 1 day = 24 hours
+TOKEN_VALIDITY = env("TOKEN_VALIDITY", 129600, cast=int)   # 3 months in minutes
 JWT_AUTH = {
     "JWT_AUTH_HEADER_PREFIX": "Bearer",
     "JWT_EXPIRATION_DELTA": datetime.timedelta(minutes=TOKEN_VALIDITY),
