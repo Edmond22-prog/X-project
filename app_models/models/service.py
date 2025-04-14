@@ -43,10 +43,9 @@ class ServiceRequest(models.Model):
     fixed_amount = models.IntegerField()  # In FCFA
     category = models.ForeignKey(
         ServiceCategory,
-        on_delete=models.SET_DEFAULT,
+        on_delete=models.SET_NULL,
         related_name="requests",
-        null=False,
-        default="Autre | Other",
+        null=True,
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -83,10 +82,9 @@ class ServiceProposal(models.Model):
     skills = models.ManyToManyField(ServiceProposalSkill)
     category = models.ForeignKey(
         ServiceCategory,
-        on_delete=models.SET_DEFAULT,
+        on_delete=models.SET_NULL,
         related_name="proposals",
-        null=False,
-        default="Autre | Other",
+        null=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

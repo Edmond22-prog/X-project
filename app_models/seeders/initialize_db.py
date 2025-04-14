@@ -119,6 +119,12 @@ categories = [
         "en_name": "Government & Public Services",
         "en_description": "Law Enforcement, Military & Defense, Public Policy, Urban Planning",
     },
+    {
+        "fr_name": "Autres",
+        "fr_description": "Autres services non classés ailleurs",
+        "en_name": "Others",
+        "en_description": "Other unclassified services",
+    }
 ]
 
 for category in categories:
