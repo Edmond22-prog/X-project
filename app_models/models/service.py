@@ -83,9 +83,10 @@ class ServiceProposal(models.Model):
     skills = models.ManyToManyField(ServiceProposalSkill)
     category = models.ForeignKey(
         ServiceCategory,
-        on_delete=models.SET_NULL,
+        on_delete=models.SET_DEFAULT,
         related_name="proposals",
-        null=True,
+        null=False,
+        default="Autre | Other",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
