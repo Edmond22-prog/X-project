@@ -87,7 +87,14 @@ class CreateServiceRequestAPIView(APIView):
 class PaginatedServiceRequestsAPIView(APIView):
     @swagger_auto_schema(
         operation_id="paginated_services_requests",
-        operation_description="Endpoint for getting paginated services requests",
+        operation_description="""
+        Endpoint for getting paginated services requests.
+        
+        To retrieve paginated services requests, you can use the following query parameters:
+        - **page**: The page number to retrieve (default is 1).
+        - **size**: The number of items per page (default is 10).
+        **Exemple**: /services/requests/list/?page=2&size=5
+        """,
         operation_summary="Get paginated services requests",
         responses={200: ServiceRequestSerializer(many=True)},
         tags=["Services"],
@@ -253,7 +260,14 @@ class CreateServiceProposalAPIView(APIView):
 class PaginatedServiceProposalsAPIView(APIView):
     @swagger_auto_schema(
         operation_id="paginated_service_proposals",
-        operation_description="Endpoint for getting paginated service proposals with optional filters",
+        operation_description="""
+        Endpoint for getting paginated service proposals with optional filters.
+        
+        To retrieve paginated services proposals, you can use the following query parameters:
+        - **page**: The page number to retrieve (default is 1).
+        - **size**: The number of items per page (default is 10).
+        **Exemple**: /services/proposals/list/?page=2&size=5
+        """,
         operation_summary="Get paginated service proposals",
         responses={200: ServiceProposalSerializer(many=True)},
         tags=["Services"],
