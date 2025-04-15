@@ -11,6 +11,7 @@ from app_models.models import (
 class ServiceRequestSerializer(serializers.ModelSerializer):
     socials = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceRequest
@@ -33,6 +34,13 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
             "last_name": user.last_name,
             "is_verified": user.is_verified,
         }
+    
+    def get_category(self, service_prop):
+        if service_prop.category:
+            category = service_prop.category
+            return f"{category.fr_name} | {category.en_name}"
+
+        return None
 
 
 class ServiceProposalSerializer(serializers.ModelSerializer):
@@ -69,6 +77,7 @@ class CreateServiceRequestSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(max_length=20, required=False)
     whatsapp = serializers.CharField(max_length=20, required=False)
     telegram = serializers.CharField(max_length=20, required=False)
+    category_uuid = serializers.CharField(required=False)
 
     class Meta:
         model = ServiceRequest
@@ -83,7 +92,9 @@ class CreateServiceRequestSerializer(serializers.ModelSerializer):
             "phone",
             "whatsapp",
             "telegram",
+            "category_uuid",
         )
+        extra_kwargs = {"description": {"required": False, "default": ""}}
 
     def validate(self, attrs):
         if not any(
@@ -114,8 +125,8 @@ class ServiceCategorySerializer(serializers.ModelSerializer):
 
 
 class CreateServiceProposalSerializer(serializers.ModelSerializer):
-    skills = serializers.ListField(child=serializers.CharField())
-    category_uuid = serializers.CharField()
+    skills = serializers.ListField(child=serializers.CharField(), required=False)
+    category_uuid = serializers.CharField(required=False)
 
     class Meta:
         model = ServiceProposal
@@ -126,15 +137,7 @@ class CreateServiceProposalSerializer(serializers.ModelSerializer):
             "skills",
             "category_uuid",
         )
-
-    def validate(self, attrs):
-        if not attrs.get("skills", None):
-            raise serializers.ValidationError("Skills are required.")
-
-        if not attrs.get("category_uuid", None):
-            raise serializers.ValidationError("Category is required.")
-
-        return attrs
+        extra_kwargs = {"description": {"required": False, "default": ""}}
 
 
 class UpdateServiceRequestSerializer(serializers.ModelSerializer):

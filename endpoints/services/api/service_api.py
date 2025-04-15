@@ -58,6 +58,28 @@ class CreateServiceRequestAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        # Check if the category exists
+        if validated_data.get("category_uuid", None):
+            try:
+                existing_category = ServiceCategory.objects.get(
+                    uuid=validated_data["category_uuid"],
+                )
+            except ServiceCategory.DoesNotExist:
+                return Response(
+                    {"error": "Category not found !"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        else:
+            existing_category, _ = ServiceCategory.objects.get_or_create(
+                **{
+                    "fr_name": "Autres",
+                    "fr_description": "Autres services non classés ailleurs",
+                    "en_name": "Others",
+                    "en_description": "Other unclassified services",
+                }
+            )
+
         # Create the service request
         service_request = ServiceRequest.objects.create(
             user=connected_user,
@@ -67,6 +89,7 @@ class CreateServiceRequestAPIView(APIView):
             district=validated_data["district"],
             duration=validated_data["duration"],
             fixed_amount=validated_data["fixed_amount"],
+            category=existing_category,
         )
 
         # Create the service request socials
@@ -221,22 +244,33 @@ class CreateServiceProposalAPIView(APIView):
 
         # Create or get skills
         skills = []
-        for skill_name in validated_data["skills"]:
+        for skill_name in validated_data.get("skills", []):
             formatted_skill_name = skill_name.strip().lower()
-            skill, created = ServiceProposalSkill.objects.get_or_create(
+            skill, _ = ServiceProposalSkill.objects.get_or_create(
                 name=formatted_skill_name
             )
             skills.append(skill)
 
         # Check if the category exists
-        try:
-            existing_category = ServiceCategory.objects.get(
-                uuid=validated_data["category_uuid"],
-            )
-        except ServiceCategory.DoesNotExist:
-            return Response(
-                {"error": "Category not found !"},
-                status=status.HTTP_404_NOT_FOUND,
+        if validated_data.get("category_uuid", None):
+            try:
+                existing_category = ServiceCategory.objects.get(
+                    uuid=validated_data["category_uuid"],
+                )
+            except ServiceCategory.DoesNotExist:
+                return Response(
+                    {"error": "Category not found !"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        else:
+            existing_category, _ = ServiceCategory.objects.get_or_create(
+                **{
+                    "fr_name": "Autres",
+                    "fr_description": "Autres services non classés ailleurs",
+                    "en_name": "Others",
+                    "en_description": "Other unclassified services",
+                }
             )
 
         # Create the service proposal
