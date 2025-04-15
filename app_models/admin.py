@@ -6,7 +6,7 @@ from app_models.models import (
     ServiceRequestSocials,
     ServiceProposal,
     ServiceProposalSkill,
-    ServiceProposalCategory,
+    ServiceCategory,
     User,
     UserSocials,
     UserVerification,
@@ -63,6 +63,6 @@ admin.site.site_header = "X-Project Administration Site"
 admin.site.site_title = "X-Project Admin"
 
 admin.site.register(ServiceProposalSkill)
-admin.site.register(ServiceProposalCategory)
+admin.site.register(ServiceCategory)
 admin.site.register(UserSocials)
 admin.site.register(ServiceRequestSocials)

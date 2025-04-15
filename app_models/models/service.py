@@ -5,6 +5,23 @@ from app_models.models.constants import ServiceRequestStatus, SERVICE_REQUEST_ST
 from utils.common import generate_uuid
 
 
+class ServiceCategory(models.Model):
+    uuid = models.CharField(
+        max_length=100, default=generate_uuid, editable=False, primary_key=True
+    )
+    fr_name = models.CharField(max_length=50, unique=True)
+    fr_description = models.TextField()
+    en_name = models.CharField(max_length=50, unique=True)
+    en_description = models.TextField()
+
+    class Meta:
+        verbose_name = "service category"
+        verbose_name_plural = "Services Categories"
+
+    def __str__(self):
+        return f"{self.fr_name} | {self.en_name}"
+
+
 class ServiceRequest(models.Model):
     uuid = models.CharField(
         max_length=100, default=generate_uuid, editable=False, primary_key=True
@@ -24,6 +41,12 @@ class ServiceRequest(models.Model):
     district = models.CharField(max_length=100)
     duration = models.IntegerField()  # In days
     fixed_amount = models.IntegerField()  # In FCFA
+    category = models.ForeignKey(
+        ServiceCategory,
+        on_delete=models.SET_NULL,
+        related_name="requests",
+        null=True,
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -47,23 +70,6 @@ class ServiceProposalSkill(models.Model):
         return self.name
 
 
-class ServiceProposalCategory(models.Model):
-    uuid = models.CharField(
-        max_length=100, default=generate_uuid, editable=False, primary_key=True
-    )
-    fr_name = models.CharField(max_length=50, unique=True)
-    fr_description = models.TextField()
-    en_name = models.CharField(max_length=50, unique=True)
-    en_description = models.TextField()
-
-    class Meta:
-        verbose_name = "service proposal category"
-        verbose_name_plural = "Services Proposals Categories"
-
-    def __str__(self):
-        return f"{self.fr_name} | {self.en_name}"
-
-
 class ServiceProposal(models.Model):
     uuid = models.CharField(
         max_length=100, default=generate_uuid, editable=False, primary_key=True
@@ -75,7 +81,7 @@ class ServiceProposal(models.Model):
     hourly_rate = models.IntegerField()  # In FCFA
     skills = models.ManyToManyField(ServiceProposalSkill)
     category = models.ForeignKey(
-        ServiceProposalCategory,
+        ServiceCategory,
         on_delete=models.SET_NULL,
         related_name="proposals",
         null=True,

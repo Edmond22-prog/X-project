@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_models.models import (
-    ServiceProposalCategory,
+    ServiceCategory,
     ServiceProposalSkill,
     ServiceRequest,
     ServiceRequestSocials,
@@ -17,7 +17,7 @@ from middlewares.auth_middleware import check_is_connected
 from serializers.service_serializer import (
     CreateServiceProposalSerializer,
     CreateServiceRequestSerializer,
-    ServiceProposalCategorySerializer,
+    ServiceCategorySerializer,
     ServiceProposalSerializer,
     ServiceProposalSkillSerializer,
     ServiceRequestSerializer,
@@ -58,6 +58,28 @@ class CreateServiceRequestAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        # Check if the category exists
+        if validated_data.get("category_uuid", None):
+            try:
+                existing_category = ServiceCategory.objects.get(
+                    uuid=validated_data["category_uuid"],
+                )
+            except ServiceCategory.DoesNotExist:
+                return Response(
+                    {"error": "Category not found !"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        else:
+            existing_category, _ = ServiceCategory.objects.get_or_create(
+                **{
+                    "fr_name": "Autres",
+                    "fr_description": "Autres services non classés ailleurs",
+                    "en_name": "Others",
+                    "en_description": "Other unclassified services",
+                }
+            )
+
         # Create the service request
         service_request = ServiceRequest.objects.create(
             user=connected_user,
@@ -67,6 +89,7 @@ class CreateServiceRequestAPIView(APIView):
             district=validated_data["district"],
             duration=validated_data["duration"],
             fixed_amount=validated_data["fixed_amount"],
+            category=existing_category,
         )
 
         # Create the service request socials
@@ -87,7 +110,25 @@ class CreateServiceRequestAPIView(APIView):
 class PaginatedServiceRequestsAPIView(APIView):
     @swagger_auto_schema(
         operation_id="paginated_services_requests",
-        operation_description="Endpoint for getting paginated services requests",
+        operation_description="""
+        # Endpoint for getting paginated services requests.
+        
+        ## To retrieve paginated services requests, you can use the following query parameters:
+        - **page**: The page number to retrieve (default is 1).
+        - **size**: The number of items per page (default is 10).
+        **Exemple**: /services/requests/list/?page=2&size=5
+        
+        ## To apply filters, you can use the following query parameters:
+        - **town**: The town of the service request.
+        - **category_uuid**: The uuid of the service category.
+        - **min_amount**: The minimum fixed amount of the service request.
+        - **max_amount**: The maximum fixed amount of the service request.
+        **Exemple**: /services/requests/list/?town=Douala&category_uuid=32fcc008b5ef4d84b0390bdcca229b9a&min_amount=1000&max_amount=5000
+        
+        ## If you want to sort the results, you can use the following query parameter:
+        - **sort**: The sorting order (default is "desc"). Use "asc" for ascending order.
+        **Exemple**: /services/requests/list/?sort=asc
+        """,
         operation_summary="Get paginated services requests",
         responses={200: ServiceRequestSerializer(many=True)},
         tags=["Services"],
@@ -101,14 +142,31 @@ class PaginatedServiceRequestsAPIView(APIView):
 
         if "size" in request.GET and request.GET["size"].strip() != "":
             size = int(request.GET["size"])
+        
+        filters = {}
+        if "town" in request.GET and request.GET["town"].strip() != "":
+            filters["town"] = request.GET["town"]
+        
+        if "category_uuid" in request.GET and request.GET["category_uuid"].strip() != "":
+            filters["category__uuid"] = request.GET["category_uuid"]
+        
+        if "min_amount" in request.GET and request.GET["min_amount"].strip() != "":
+            filters["fixed_amount__gte"] = request.GET["min_amount"]
+        
+        if "max_amount" in request.GET and request.GET["max_amount"].strip() != "":
+            filters["fixed_amount__lte"] = request.GET["max_amount"]
+
+        sort = "desc"
+        if "sort" in request.GET and request.GET["sort"].strip() != "":
+            sort = request.GET["sort"]
 
         start = (page - 1) * size
         end = page * size
 
         # Retrieve services requests
         services_requests = ServiceRequest.objects.filter(
-            status=ServiceRequestStatus.ACTIVE,
-        ).order_by("-updated_at")
+            **filters, status=ServiceRequestStatus.ACTIVE,
+        ).order_by("-updated_at" if sort == "desc" else "updated_at")
         total = services_requests.count()
 
         output = {
@@ -169,14 +227,14 @@ class RetrieveCategoriesAPIView(APIView):
         operation_id="retrieve_categories",
         operation_description="Endpoint for retrieving all service proposal categories",
         operation_summary="Retrieve all service proposal categories",
-        responses={200: ServiceProposalCategorySerializer(many=True)},
+        responses={200: ServiceCategorySerializer(many=True)},
         tags=["Services"],
         security=[],
     )
     def get(self, request):
-        categories = ServiceProposalCategory.objects.all()
+        categories = ServiceCategory.objects.all()
         return Response(
-            ServiceProposalCategorySerializer(categories, many=True).data,
+            ServiceCategorySerializer(categories, many=True).data,
             status=status.HTTP_200_OK,
         )
 
@@ -214,22 +272,33 @@ class CreateServiceProposalAPIView(APIView):
 
         # Create or get skills
         skills = []
-        for skill_name in validated_data["skills"]:
+        for skill_name in validated_data.get("skills", []):
             formatted_skill_name = skill_name.strip().lower()
-            skill, created = ServiceProposalSkill.objects.get_or_create(
+            skill, _ = ServiceProposalSkill.objects.get_or_create(
                 name=formatted_skill_name
             )
             skills.append(skill)
 
         # Check if the category exists
-        try:
-            existing_category = ServiceProposalCategory.objects.get(
-                uuid=validated_data["category_uuid"],
-            )
-        except ServiceProposalCategory.DoesNotExist:
-            return Response(
-                {"error": "Category not found !"},
-                status=status.HTTP_404_NOT_FOUND,
+        if validated_data.get("category_uuid", None):
+            try:
+                existing_category = ServiceCategory.objects.get(
+                    uuid=validated_data["category_uuid"],
+                )
+            except ServiceCategory.DoesNotExist:
+                return Response(
+                    {"error": "Category not found !"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        else:
+            existing_category, _ = ServiceCategory.objects.get_or_create(
+                **{
+                    "fr_name": "Autres",
+                    "fr_description": "Autres services non classés ailleurs",
+                    "en_name": "Others",
+                    "en_description": "Other unclassified services",
+                }
             )
 
         # Create the service proposal
@@ -253,7 +322,14 @@ class CreateServiceProposalAPIView(APIView):
 class PaginatedServiceProposalsAPIView(APIView):
     @swagger_auto_schema(
         operation_id="paginated_service_proposals",
-        operation_description="Endpoint for getting paginated service proposals with optional filters",
+        operation_description="""
+        # Endpoint for getting paginated service proposals with optional filters.
+        
+        ## To retrieve paginated services proposals, you can use the following query parameters:
+        - **page**: The page number to retrieve (default is 1).
+        - **size**: The number of items per page (default is 10).
+        **Exemple**: /services/proposals/list/?page=2&size=5
+        """,
         operation_summary="Get paginated service proposals",
         responses={200: ServiceProposalSerializer(many=True)},
         tags=["Services"],
@@ -387,14 +463,14 @@ class UpdateServiceProposalAPIView(APIView):
                 {"error": "Error while trying to update service proposal"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         validated_data = serializer.validated_data
         if "category_uuid" in validated_data:
             try:
-                existing_category = ServiceProposalCategory.objects.get(
+                existing_category = ServiceCategory.objects.get(
                     uuid=validated_data["category_uuid"],
                 )
-            except ServiceProposalCategory.DoesNotExist:
+            except ServiceCategory.DoesNotExist:
                 return Response(
                     {"error": "Category not found !"},
                     status=status.HTTP_404_NOT_FOUND,
@@ -411,7 +487,7 @@ class UpdateServiceProposalAPIView(APIView):
                     name=formatted_skill_name
                 )
                 skills.append(skill)
-                
+
             service_proposal.skills.set(skills)
 
         serializer.save()
