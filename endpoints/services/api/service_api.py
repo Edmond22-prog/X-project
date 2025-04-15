@@ -111,12 +111,23 @@ class PaginatedServiceRequestsAPIView(APIView):
     @swagger_auto_schema(
         operation_id="paginated_services_requests",
         operation_description="""
-        Endpoint for getting paginated services requests.
+        # Endpoint for getting paginated services requests.
         
-        To retrieve paginated services requests, you can use the following query parameters:
+        ## To retrieve paginated services requests, you can use the following query parameters:
         - **page**: The page number to retrieve (default is 1).
         - **size**: The number of items per page (default is 10).
         **Exemple**: /services/requests/list/?page=2&size=5
+        
+        ## To apply filters, you can use the following query parameters:
+        - **town**: The town of the service request.
+        - **category_uuid**: The uuid of the service category.
+        - **min_amount**: The minimum fixed amount of the service request.
+        - **max_amount**: The maximum fixed amount of the service request.
+        **Exemple**: /services/requests/list/?town=Douala&category_uuid=32fcc008b5ef4d84b0390bdcca229b9a&min_amount=1000&max_amount=5000
+        
+        ## If you want to sort the results, you can use the following query parameter:
+        - **sort**: The sorting order (default is "desc"). Use "asc" for ascending order.
+        **Exemple**: /services/requests/list/?sort=asc
         """,
         operation_summary="Get paginated services requests",
         responses={200: ServiceRequestSerializer(many=True)},
@@ -131,14 +142,31 @@ class PaginatedServiceRequestsAPIView(APIView):
 
         if "size" in request.GET and request.GET["size"].strip() != "":
             size = int(request.GET["size"])
+        
+        filters = {}
+        if "town" in request.GET and request.GET["town"].strip() != "":
+            filters["town"] = request.GET["town"]
+        
+        if "category_uuid" in request.GET and request.GET["category_uuid"].strip() != "":
+            filters["category__uuid"] = request.GET["category_uuid"]
+        
+        if "min_amount" in request.GET and request.GET["min_amount"].strip() != "":
+            filters["fixed_amount__gte"] = request.GET["min_amount"]
+        
+        if "max_amount" in request.GET and request.GET["max_amount"].strip() != "":
+            filters["fixed_amount__lte"] = request.GET["max_amount"]
+
+        sort = "desc"
+        if "sort" in request.GET and request.GET["sort"].strip() != "":
+            sort = request.GET["sort"]
 
         start = (page - 1) * size
         end = page * size
 
         # Retrieve services requests
         services_requests = ServiceRequest.objects.filter(
-            status=ServiceRequestStatus.ACTIVE,
-        ).order_by("-updated_at")
+            **filters, status=ServiceRequestStatus.ACTIVE,
+        ).order_by("-updated_at" if sort == "desc" else "updated_at")
         total = services_requests.count()
 
         output = {
@@ -295,9 +323,9 @@ class PaginatedServiceProposalsAPIView(APIView):
     @swagger_auto_schema(
         operation_id="paginated_service_proposals",
         operation_description="""
-        Endpoint for getting paginated service proposals with optional filters.
+        # Endpoint for getting paginated service proposals with optional filters.
         
-        To retrieve paginated services proposals, you can use the following query parameters:
+        ## To retrieve paginated services proposals, you can use the following query parameters:
         - **page**: The page number to retrieve (default is 1).
         - **size**: The number of items per page (default is 10).
         **Exemple**: /services/proposals/list/?page=2&size=5
