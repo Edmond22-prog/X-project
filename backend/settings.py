@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 '''
+import os
 import datetime
 from pathlib import Path
 
@@ -16,6 +17,13 @@ from envparse import env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Define the path to your .env file (assuming it's at the root of your project)
+env_file = BASE_DIR / ".env"
+
+# Check if the .env file exists and read it
+if os.path.exists(env_file):
+    env.read_envfile(env_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
