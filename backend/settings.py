@@ -101,6 +101,9 @@ DATABASES = {
         'PASSWORD': f'{env("POSTGRES_DB_PASSWORD", "password")}',
         'HOST': f'{env("POSTGRES_DB_HOST", "127.0.0.1")}',
         'PORT': f'{env("POSTGRES_DB_PORT", 5432, cast=int)}',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
